@@ -17,33 +17,37 @@ class ActorType(enum.Enum):
     RECEIVER = "RECEIVER"
     
 # an auxiliary table: only foreign keys; created without association model class. 
-act_actors = db.Table('act_actors',
-                   db.Column('act_id', db.Integer, db.ForeignKey('gratitudeact.id')),
-                   db.Column('giver_id', db.Integer, db.ForeignKey('actor.id')),
-                   db.Column('receiver_id', db.Integer, db.ForeignKey('actor.id'))
-)
-           
+# act_actors = db.Table('act_actors',
+#                    db.Column('act_id', db.Integer, db.ForeignKey('gratitudeact.id')),
+#                    db.Column('giver_id', db.Integer, db.ForeignKey('actor.id')),
+#                    db.Column('receiver_id', db.Integer, db.ForeignKey('actor.id'))
+# )
+  
+# class Actactors(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     act_id =  db.Column(db.Integer, db.ForeignKey('gratitudeact.id'))
+#     giver_id = db.Column(db.Integer, db.ForeignKey('actor.id'))
+#     receiver_id = db.Column(db.Integer, db.ForeignKey('actor.id'))
+    
+                   
 class Actofkindness(db.Model):
     __name__="aok"
     id = db.Column(db.Integer, primary_key=True)
     popularity = db.Column(db.Enum(Level))
-    giver = db.Column(db.Integer, db.ForeignKey('actor.id'))
-    receiver = db.Column(db.Integer, db.ForeignKey('actor.id'))
+    # giver = db.Column(db.Integer, db.ForeignKey('actor.id'))
+    # receiver = db.Column(db.Integer, db.ForeignKey('actor.id'))
     context =  db.Column(db.Integer, db.ForeignKey('context.id'))
+    # prompts = db.relationship('Prompt')
     
 class Gratitudeact(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     popularity = db.Column(db.Enum(Level))
-    gratitudeMessage = db.Column(db.String(1000))
-    # actor = db.Column(db.Integer, db.ForeignKey('actor.id'))
+    gratitudeMsg = db.Column(db.String(1000))
+    giver = db.Column(db.Integer, db.ForeignKey('giver.id'))
+    receiver = db.Column(db.Integer, db.ForeignKey('receiver.id'))
     context =  db.Column(db.Integer, db.ForeignKey('context.id'))
     prompts = db.relationship('Prompt')
-    act_actors = db.relationship(
-                                 'Gratitudeact',
-                                 secondary=act_actors,
-                                 primaryjoin=(act_actors.c.act_id == id),
-                                 backref = db.backref('other_people_rating', lazy='dynamic'), lazy='dynamic'
-                                 ) 
+    # act_actors = db.relationship('Actactors')
     
  
 # this can be used to raise motivation for actors by telling them how gratitude (and kindness in general) can positively impact others and them    
@@ -58,17 +62,32 @@ class Actor(db.Model):
       email = db.Column(db.String(150), unique=True)
       motivation = db.Column(db.Enum(Level))
       Ability = db.Column(db.Enum(Level)) 
-      type = db.Column(db.Enum(ActorType))
+    #   type = db.Column(db.Enum(ActorType))
     #   acts = db.relationship('Gratitudeact')
       user = db.Column(db.Integer, db.ForeignKey('user.id'))      
-      act_actors =  db.relationship(
-                                 'Actor',
-                                 secondary=act_actors,
-                                 primaryjoin=(act_actors.c.giver_id == id),
-                                 secondaryjoin=(act_actors.c.receiver_id == id),
-                                 backref = db.backref('other_people_rating', lazy='dynamic'), lazy='dynamic'
-                                 ) 
+
+class Giver(db.Model):
+      id = db.Column(db.Integer, primary_key=True)
+      name = db.Column(db.String(1000))
+      email = db.Column(db.String(150), unique=True)
+      motivation = db.Column(db.Enum(Level))
+      Ability = db.Column(db.Enum(Level)) 
+    #   type = db.Column(db.Enum(ActorType))
+    #   acts = db.relationship('Gratitudeact')
+      user = db.Column(db.Integer, db.ForeignKey('user.id'))
       
+        
+class Receiver(db.Model):
+      id = db.Column(db.Integer, primary_key=True)
+      name = db.Column(db.String(1000))
+      email = db.Column(db.String(150), unique=True)
+      motivation = db.Column(db.Enum(Level))
+      Ability = db.Column(db.Enum(Level)) 
+    #   type = db.Column(db.Enum(ActorType))
+    #   acts = db.relationship('Gratitudeact')
+      user = db.Column(db.Integer, db.ForeignKey('user.id'))  
+      
+         
 # this class characterises the context for an act... for now it just specifies time, but later can include other parameters such as space, equipment
 class Context(db.Model):
     id = db.Column(db.Integer, primary_key=True)

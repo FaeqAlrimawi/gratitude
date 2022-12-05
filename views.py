@@ -3,6 +3,8 @@ from flask_login import current_user, login_user
 from models import User
 from werkzeug.security import generate_password_hash
 from __init__ import db
+from control import test
+
 
 views = Blueprint("views", __name__)
 
@@ -18,4 +20,5 @@ def home():
         db.session.commit()
         login_user(new_user, remember=True)
     
+    test()
     return render_template("home.html", user=current_user)
