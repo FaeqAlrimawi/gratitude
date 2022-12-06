@@ -42,7 +42,7 @@ class Actofkindness(db.Model):
 class Gratitudeact(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     popularity = db.Column(db.Enum(Level))
-    gratitudeMsg = db.Column(db.String(1000))
+    message = db.Column(db.String(1000))
     giver = db.Column(db.Integer, db.ForeignKey('giver.id'))
     receiver = db.Column(db.Integer, db.ForeignKey('receiver.id'))
     context =  db.Column(db.Integer, db.ForeignKey('context.id'))

@@ -9,43 +9,44 @@ sender_email = "kindness.computing@gmail.com"
 
 
 def test():
-    # gratAct = Gratitudeact(gratitudeMsg="thank you!!")
-    # db.session.add(gratAct)
-    # db.session.commit()
+    
+    # fillWithDummyData()
     
     giver = Giver.query.filter_by(name="Faeq").first()
-    # receiver = Receiver.query.filter_by(name="Tom").first()
-    # giver = Giver(name="FaeqLero", email="faeq.alrimawi@lero.ie")
-    # receiver = Receiver(name="Tom")
+    receiver = Receiver.query.filter_by(name="Tom").first()
     
-    # db.session.add(giver)
-    # db.session.add(receiver)
-    # db.session.commit()
-    
-    # gratActs = Gratitudeact.query.all()
+    gratAct = Gratitudeact.query.first()
+    # print("grat: ", gratAct.message)
     # actors = Actor.query.all()
     
-    sendEmailToGiver(giver)
+    sendEmailToGiver(receiver, gratAct)
     # print(giver.name,giver.email)
     
     
-def sendEmailToGiver(giver):
+def sendEmailToGiver(giver, gratitudeAct):
     
     if giver is None or not isinstance(giver, Giver):
-        print("not a giver")
+        print("no giver")
         return
     
     if giver.email is None or giver.email == "":
         print("no email found")
         return
     
-    gratitude_msg = "thank you"
+    if gratitudeAct is not None and isinstance(gratitudeAct, Gratitudeact):
+        gratitude_msg = gratitudeAct.message
+    else:
+        gratitude_msg = "Thank you" # default gratitude message
+            
+    ### link to gratitude tree to where the giver should be adding a leaf
     gratitude_tree_link = "https://gratitude-tree.org/"
     
+    ### email content construction: plain text
     plain_msg = """\
         How about doing a small Gratitude act? you can add a leaf, saying {}, on the Gratitude tree ({}).  
         """.format(gratitude_msg, gratitude_tree_link)
         
+    ### email content construction: plain text    
     html_msg = """\
 <html>
 <head>
@@ -62,7 +63,7 @@ def sendEmailToGiver(giver):
 </html>
 """.format(gratitude_msg, gratitude_tree_link)
     
-    sendPlainEmail(giver.email, giver.name,"Time to be thankful", plain_msg)  
+    sendFancyEmail(giver.email, giver.name,"Time to be thankful", plain_msg, html_msg)  
   
   
 def sendPlainEmail(recipient_email, name, subject, message):
@@ -182,3 +183,19 @@ def disconnectFromSMTPServer():
     if server is not None:
         server.quit()    
     
+    
+def fillWithDummyData():
+    
+    ##gratitude act
+    gratAct = Gratitudeact(message="I appreciate your work on the event :)")
+    db.session.add(gratAct)
+    db.session.commit()
+    
+    ## giver and receiver
+    giver = Giver(name="Faeq", email="faeq.rimawi@gmail.com")
+    receiver = Receiver(name="Tom")
+    
+    db.session.add(giver)
+    db.session.add(receiver)
+    db.session.commit()
+    # return    
