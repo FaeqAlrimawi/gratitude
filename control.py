@@ -1,8 +1,9 @@
-from models import Gratitudeact, Giver, Receiver
+from models import Gratitudeact, Giver, Receiver, User
 from __init__ import db
 import smtplib, ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from werkzeug.security import generate_password_hash
 
 server = None
 sender_email = "kindness.computing@gmail.com"
@@ -10,7 +11,7 @@ sender_email = "kindness.computing@gmail.com"
 
 def test():
     
-    # fillWithDummyData()
+    fillWithDummyData()
     
     giver = Giver.query.filter_by(name="Faeq").first()
     receiver = Receiver.query.filter_by(name="Tom").first()
@@ -19,7 +20,7 @@ def test():
     # print("grat: ", gratAct.message)
     # actors = Actor.query.all()
     
-    sendEmailToGiver(receiver, gratAct)
+    # sendEmailToGiver(receiver, gratAct)
     # print(giver.name,giver.email)
     
     
@@ -57,7 +58,7 @@ def sendEmailToGiver(giver, gratitudeAct):
    
     <p>
     
-       How about doing a small <b>gratitude</b> act? you can add a leaf, saying <i>{}</i>, on the <a href="{}">Gratitude tree</a>
+       How about doing a small <b>gratitude</b> act? you can add a leaf, saying "<i>{}</i>", on the <a href="{}">Gratitude tree</a>
     </p>
   </body>
 </html>
@@ -199,3 +200,18 @@ def fillWithDummyData():
     db.session.add(receiver)
     db.session.commit()
     # return    
+    
+    
+def addUser(name, email, password)->User:
+    
+    
+    ## if already exists return none
+    if User.query.filter_by(email=str(email)).first():
+        return None
+    
+    newUser = User(name=name,email=email,password=generate_password_hash("asd12345", method='sha256'))    
+    
+    db.session.add(newUser)
+    db.session.commit()
+    
+    return newUser
