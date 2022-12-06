@@ -47,7 +47,7 @@ def sendEmailToGiver(giver, gratitudeAct):
    
     gratEmail = GratitudeEmail(recipientName=giver.name, recipientEmail=giver.email, gratitudeMessage=gratitude_msg, greetings="Good Evening", ender="Thank you for brightening one's day!")
     emailHandler = EmailHandler()
-    emailHandler.sendFancyGratitudeEmail(gratEmail)  
+    emailHandler.sendPlainGratitudeEmail(gratEmail)  
   
     
 def fillWithDummyData():
@@ -81,7 +81,10 @@ def addUser(name, email, password)->User:
     
     return newUser
 
-
+##########################################
+##########################################
+##### GRATITUDE EMAIL
+## Special class to construct gratitude emails
 class GratitudeEmail:
     def __init__(self, recipientEmail, subject="Be Thankful today!", recipientName="Gratituder",  greetings="Hi", gratitudeMessage="I appreciate the work you have been doing", ender="Best wishes", signature="Kind Computing", gratitudeTree="https://gratitude-tree.org/"):
         self.subject = subject
@@ -140,8 +143,9 @@ class GratitudeEmail:
     
     {}
     
-    {}<br>
-    --<br>
+    {}
+    
+    
     {}
     """.format(self.subject, self.greetings, self.recipientName, content, self.ender, self.signature)
     
@@ -153,14 +157,17 @@ class GratitudeEmail:
     
     {}
     
-    {}<br>
-    --<br>
-    <i>{}</i>
+    {}
+    
+    
+    {}
     """.format(self.greetings, self.recipientName, content, self.ender, self.signature)
           
-###################################
+
+##########################################
+##########################################
 #### EMAIL HANDLER
-## handles all email related tasks
+## handles all email related tasks, e.g. establish connection, send email
 class EmailHandler:
     def __init__(self, smtpServer= "smtp.gmail.com", senderEmail="kindness.computing@gmail.com"):
         self.smtpServer = smtpServer
@@ -196,28 +203,40 @@ class EmailHandler:
             # Print any error messages to stdout
             print(e)
             
+            
     def disconnectFromSMTPServer(self):
     
         if self.server is not None:
             self.server.quit()          
 
-
+    def checkSMTPServerConnection(self):
+         ## establish secure connection
+        if self.server is None:
+            self.establishConnectionToServer()
+            
+        if self.server is None:
+            print("EmailHandler->SendFancyEmail: Could not connect to mail server. Qutting (I'ma head out).")
+            return
+        
+        
+    def sendPlainGratitudeEmail(self, gratitudeEmail: GratitudeEmail):
+       
+        self.checkSMTPServerConnection()
+       
+        message = gratitudeEmail.getPlainEmailWithSubject()
+        
+        self.sendEmail(self.senderEmail, gratitudeEmail.recipientEmail, message)
+        
     def sendPlainEmail(self, recipient_email, name, subject, message):
     
         if recipient_email is None or recipient_email == "":
             print("EmailHandLer->SendPlainEmail: An email is required")
             return
         
-        ## establish secure connection
-        if self.server is None:
-            self.establishConnectionToServer()
-            
-        if self.server is None:
-            print("EmailHandler->SendPlainEmail: Could not connect to mail server ({}). Qutting (I'ma head out).".format(self.smtpServer))
-            return
+        self.checkSMTPServerConnection()
 
         gratEmail = GratitudeEmail(recipientEmail=recipient_email, recipientName=name, subject=subject, gratitudeMessage=message)
-        msg = gratEmail.getHTMLEmail()
+        msg = gratEmail.getPlainEmailWithSubject()
         
         self.sendEmail(self.senderEmail, recipient_email, msg) 
 
@@ -239,13 +258,7 @@ class EmailHandler:
             print("EmailHandler->SendFancyEmail: An email is required")
             return
         
-        ## establish secure connection
-        if self.server is None:
-            self.establishConnectionToServer()
-            
-        if self.server is None:
-            print("EmailHandler->SendFancyEmail: Could not connect to mail server. Qutting (I'ma head out).")
-            return
+        self.checkSMTPServerConnection()
 
         if name is None or name == "":
             name = "Gratituder"
@@ -273,7 +286,7 @@ class EmailHandler:
     def sendEmail(self, senderEmail, recipientEmail, message):
         try:
             print("sending message to: ", recipientEmail)
-            # print("msg  ", message)
+            print("msg  ", message)
             self.server.sendmail(senderEmail, recipientEmail, str(message))
             print("done sending")
         except Exception as e:
