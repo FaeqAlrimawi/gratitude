@@ -45,7 +45,7 @@ def sendEmailToGiver(giver, gratitudeAct):
     ### email content construction: plain text
  
    
-    gratEmail = GratitudeEmail(recipientName=giver.name, recipientEmail=giver.email, gratitudeMessage=gratitude_msg)
+    gratEmail = GratitudeEmail(recipientName=giver.name, recipientEmail=giver.email, gratitudeMessage=gratitude_msg, greetings="Good Evening", ender="Thank you for brightening one's day!")
     emailHandler = EmailHandler()
     emailHandler.sendFancyGratitudeEmail(gratEmail)  
   
@@ -110,17 +110,29 @@ class GratitudeEmail:
         How about doing a Gratitude act of the day? you add a leaf, saying "{}", on the gratitude tree ({})
         """.format(self.gratitudeMessage, self.gratitudeTree)
         
+    def setHTMLContent(self, HTMLContent):
+        self.HTMLContent = HTMLContent
         
+    def setPlainContent(self, plainContent):
+        self.plainContent = plainContent
+                    
     def __str__(self):
         return self.getEmailWithContent(self.plainContent)   
     
-    def getHTMLEmail(self):
+    def getHTMLEmailWithSubject(self):
         return self.getEmailWithContent(self.HTMLContent)
     
-    def getPlainEmail(self):
-        return self.getEmailWithContent(self.plainContent)
+    def getHTMLEmailWithContentOnly(self):
+        return self.getEmailWithContentOnly(self.HTMLContent)
+    
+    def getPlainEmailWithSubject(self):
+        return self.getEmailWithSubjectAndContent(self.plainContent)
+    
         
-    def getEmailWithContent(self, content):
+    def getPlainEmailWithContentOnly(self):
+        return self.getEmailWithContentOnly(self.plainContent)
+        
+    def getEmailWithSubjectAndContent(self, content):
         return """\
     Subject: {}
     
@@ -128,12 +140,23 @@ class GratitudeEmail:
     
     {}
     
-    {}
-    --
+    {}<br>
+    --<br>
     {}
     """.format(self.subject, self.greetings, self.recipientName, content, self.ender, self.signature)
     
     
+    def getEmailWithContentOnly(self, content):
+        return """\
+    
+    {} {}
+    
+    {}
+    
+    {}<br>
+    --<br>
+    <i>{}</i>
+    """.format(self.greetings, self.recipientName, content, self.ender, self.signature)
           
 ###################################
 #### EMAIL HANDLER
@@ -203,8 +226,8 @@ class EmailHandler:
         recipient_email = gratitudeEmail.recipientEmail
         name = gratitudeEmail.recipientName
         subject = gratitudeEmail.subject
-        plain_message = gratitudeEmail.plainContent
-        html_message = gratitudeEmail.HTMLContent
+        plain_message = gratitudeEmail.getPlainEmailWithContentOnly()
+        html_message = gratitudeEmail.getHTMLEmailWithContentOnly()
         
         # print("html ", html_message)
         self.sendFancyEmail(recipient_email, name, subject, plain_message, html_message)
