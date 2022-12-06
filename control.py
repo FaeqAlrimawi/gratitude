@@ -11,7 +11,7 @@ sender_email = "kindness.computing@gmail.com"
 
 def test():
     
-    fillWithDummyData()
+    # fillWithDummyData()
     
     giver = Giver.query.filter_by(name="Faeq").first()
     receiver = Receiver.query.filter_by(name="Tom").first()
@@ -20,7 +20,7 @@ def test():
     # print("grat: ", gratAct.message)
     # actors = Actor.query.all()
     
-    # sendEmailToGiver(receiver, gratAct)
+    sendEmailToGiver(giver, gratAct)
     # print(giver.name,giver.email)
     
     
@@ -40,150 +40,15 @@ def sendEmailToGiver(giver, gratitudeAct):
         gratitude_msg = "Thank you" # default gratitude message
             
     ### link to gratitude tree to where the giver should be adding a leaf
-    gratitude_tree_link = "https://gratitude-tree.org/"
+    # gratitude_tree_link = "https://gratitude-tree.org/"
     
     ### email content construction: plain text
-    plain_msg = """\
-        How about doing a small Gratitude act? you can add a leaf, saying {}, on the Gratitude tree ({}).  
-        """.format(gratitude_msg, gratitude_tree_link)
-        
-    ### email content construction: plain text    
-    html_msg = """\
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-</head>
-  <body>
+ 
    
-    <p>
-    
-       How about doing a small <b>gratitude</b> act? you can add a leaf, saying "<i>{}</i>", on the <a href="{}">Gratitude tree</a>
-    </p>
-  </body>
-</html>
-""".format(gratitude_msg, gratitude_tree_link)
-    
-    sendFancyEmail(giver.email, giver.name,"Time to be thankful", plain_msg, html_msg)  
+    gratEmail = GratitudeEmail(recipientName=giver.name, recipientEmail=giver.email, gratitudeMessage=gratitude_msg)
+    emailHandler = EmailHandler()
+    emailHandler.sendFancyGratitudeEmail(gratEmail)  
   
-  
-def sendPlainEmail(recipient_email, name, subject, message):
-    global sender_email
-    
-    if recipient_email is None or recipient_email == "":
-        print("control->SendEmail: An email is required")
-        return
-    
-    ## establish secure connection
-    if server is None:
-        establishConnectionToGmailServer()
-        
-    if server is None:
-        print("Could not connect to mail server. Qutting (I'ma head out).")
-        return
-
-    if name is None or name == "":
-        name = "Gratituder"
-    
-    msg = """\
-Subject: {}
-
-Hi {}... 
-
-{}""".format(subject,name,message)
-
-    try:
-        print("sending message to: ", recipient_email)
-        server.sendmail(sender_email, recipient_email, msg)
-        print("done sending")
-    except Exception as e:
-        # Print any error messages to stdout
-        print(e)
-    # finally:
-    #     print("qutting the smtp server")
-    #     server.quit() 
-    
-    
-    
-def sendFancyEmail(recipient_email, name, subject, plain_message, html_message):
-    global sender_email
-    
-    if recipient_email is None or recipient_email == "":
-        print("control->SendEmail: An email is required")
-        return
-    
-    ## establish secure connection
-    if server is None:
-        establishConnectionToGmailServer()
-        
-    if server is None:
-        print("Could not connect to mail server. Qutting (I'ma head out).")
-        return
-
-    if name is None or name == "":
-        name = "Gratituder"
-    
-    message = MIMEMultipart("alternative")
-    message["Subject"] = subject
-    message["From"] = sender_email
-    message["To"] = recipient_email
-    
-    text = plain_message
-    html = html_message
-    
-    # Turn these into plain/html MIMEText objects
-    part1 = MIMEText(text, "plain")
-    part2 = MIMEText(html, "html")
-    
-    # Add HTML/plain-text parts to MIMEMultipart message
-    # The email client will try to render the last part first
-    message.attach(part1)
-    message.attach(part2)
-
-    try:
-        print("sending message to: ", recipient_email)
-        server.sendmail(sender_email, recipient_email, message.as_string())
-        print("done sending")
-    except Exception as e:
-        # Print any error messages to stdout
-        print(e)
-    # finally:
-    #     print("qutting the smtp server")
-    #     server.quit() 
-
-      
-def establishConnectionToGmailServer():
-    global server
-    global sender_email
-    
-    password = "gjpqocclovspawrx" #an in-app passsword 
-    ## establish secure connection
-    port = 587  # For SSL
-    smtp_server = "smtp.gmail.com"
-    # Create a secure SSL context
-    context = ssl.create_default_context()
-
-    # Try to log in to server and send email
-    try:
-        print("creating a Gmail SMTP server connection...")
-        server = smtplib.SMTP(smtp_server,port)
-        # server.ehlo() # Can be omitted
-        print("securing connection...")
-        server.starttls(context=context) # Secure the connection
-        # server.ehlo() # Can be omitted
-        print("logging in...")
-        server.login(sender_email, password)
-        
-    except Exception as e:
-        # Print any error messages to stdout
-        print(e)
-       
-          
-def disconnectFromSMTPServer():
-    
-    if server is not None:
-        server.quit()    
-    
     
 def fillWithDummyData():
     
@@ -215,3 +80,179 @@ def addUser(name, email, password)->User:
     db.session.commit()
     
     return newUser
+
+
+class GratitudeEmail:
+    def __init__(self, recipientEmail, subject="Be Thankful today!", recipientName="Gratituder",  greetings="Hi", gratitudeMessage="I appreciate the work you have been doing", ender="Best wishes", signature="Kind Computing", gratitudeTree="https://gratitude-tree.org/"):
+        self.subject = subject
+        self.recipientName = recipientName
+        self.recipientEmail = recipientEmail
+        self.greetings = greetings
+        self.gratitudeMessage = gratitudeMessage     
+        self.ender = ender
+        self.signature = signature
+        self.gratitudeTree = "https://gratitude-tree.org/"
+        self.HTMLContent =  """<html>
+    <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    </head>
+    <body>
+        <p>
+        How about doing a small <b>gratitude</b> act? 
+        You can add a leaf, saying "<i>{}</i>", on the <a href="{}">Gratitude tree</a>
+        </p>
+    </body>
+    </html>""".format(self.gratitudeMessage, self.gratitudeTree)
+    
+        self.plainContent = """
+        
+        How about doing a Gratitude act of the day? you add a leaf, saying "{}", on the gratitude tree ({})
+        """.format(self.gratitudeMessage, self.gratitudeTree)
+        
+        
+    def __str__(self):
+        return self.getEmailWithContent(self.plainContent)   
+    
+    def getHTMLEmail(self):
+        return self.getEmailWithContent(self.HTMLContent)
+    
+    def getPlainEmail(self):
+        return self.getEmailWithContent(self.plainContent)
+        
+    def getEmailWithContent(self, content):
+        return """\
+    Subject: {}
+    
+    {} {}
+    
+    {}
+    
+    {}
+    --
+    {}
+    """.format(self.subject, self.greetings, self.recipientName, content, self.ender, self.signature)
+    
+    
+          
+###################################
+#### EMAIL HANDLER
+## handles all email related tasks
+class EmailHandler:
+    def __init__(self, smtpServer= "smtp.gmail.com", senderEmail="kindness.computing@gmail.com"):
+        self.smtpServer = smtpServer
+        self.senderEmail = senderEmail
+        self.server = None
+        
+    def __str__(instance): # instance or self, or any other name is ok as long as it is the first parameter of any function in the class
+        return f"SMTP Server: {instance.smtpServer}, Sender Email: {instance.senderEmail}"
+        
+    def establishConnectionToServer(self):
+        if self.server is not None:
+            return 
+        
+        # global server
+        password = "gjpqocclovspawrx" #an in-app passsword 
+        ## establish secure connection
+        port = 587  # For SSL
+        # Create a secure SSL context
+        context = ssl.create_default_context()
+
+        # Try to log in to server and send email
+        try:
+            print("creating a Gmail SMTP server connection...")
+            self.server = smtplib.SMTP(self.smtpServer,port)
+            # server.ehlo() # Can be omitted
+            print("securing connection...")
+            self.server.starttls(context=context) # Secure the connection
+            # server.ehlo() # Can be omitted
+            print("logging in...")
+            self.server.login(self.senderEmail, password)
+            
+        except Exception as e:
+            # Print any error messages to stdout
+            print(e)
+            
+    def disconnectFromSMTPServer(self):
+    
+        if self.server is not None:
+            self.server.quit()          
+
+
+    def sendPlainEmail(self, recipient_email, name, subject, message):
+    
+        if recipient_email is None or recipient_email == "":
+            print("EmailHandLer->SendPlainEmail: An email is required")
+            return
+        
+        ## establish secure connection
+        if self.server is None:
+            self.establishConnectionToServer()
+            
+        if self.server is None:
+            print("EmailHandler->SendPlainEmail: Could not connect to mail server ({}). Qutting (I'ma head out).".format(self.smtpServer))
+            return
+
+        gratEmail = GratitudeEmail(recipientEmail=recipient_email, recipientName=name, subject=subject, gratitudeMessage=message)
+        msg = gratEmail.getHTMLEmail()
+        
+        self.sendEmail(self.senderEmail, recipient_email, msg) 
+
+     
+    def sendFancyGratitudeEmail(self, gratitudeEmail: GratitudeEmail):
+        recipient_email = gratitudeEmail.recipientEmail
+        name = gratitudeEmail.recipientName
+        subject = gratitudeEmail.subject
+        plain_message = gratitudeEmail.plainContent
+        html_message = gratitudeEmail.HTMLContent
+        
+        # print("html ", html_message)
+        self.sendFancyEmail(recipient_email, name, subject, plain_message, html_message)
+        
+          
+    def sendFancyEmail(self, recipient_email, name, subject, plain_message, html_message):
+        
+        if recipient_email is None or recipient_email == "":
+            print("EmailHandler->SendFancyEmail: An email is required")
+            return
+        
+        ## establish secure connection
+        if self.server is None:
+            self.establishConnectionToServer()
+            
+        if self.server is None:
+            print("EmailHandler->SendFancyEmail: Could not connect to mail server. Qutting (I'ma head out).")
+            return
+
+        if name is None or name == "":
+            name = "Gratituder"
+        
+        message = MIMEMultipart("alternative")
+        message["Subject"] = subject
+        message["From"] = self.senderEmail
+        message["To"] = recipient_email
+        
+        text = plain_message
+        html = html_message
+        
+        # Turn these into plain/html MIMEText objects
+        part1 = MIMEText(text, "plain")
+        part2 = MIMEText(html, "html")
+        
+        # Add HTML/plain-text parts to MIMEMultipart message
+        # The email client will try to render the last part first
+        message.attach(part1)
+        message.attach(part2)
+
+        self.sendEmail(self.senderEmail, recipient_email, message)
+
+    
+    def sendEmail(self, senderEmail, recipientEmail, message):
+        try:
+            print("sending message to: ", recipientEmail)
+            # print("msg  ", message)
+            self.server.sendmail(senderEmail, recipientEmail, str(message))
+            print("done sending")
+        except Exception as e:
+            # Print any error messages to stdout
+            print(e)
