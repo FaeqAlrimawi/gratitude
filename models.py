@@ -56,31 +56,41 @@ class GratitudeImpactInfo(db.Model):
     info = db.Column(db.String(1000))
  
              
-class Actor(db.Model):
-      id = db.Column(db.Integer, primary_key=True)
-      name = db.Column(db.String(1000))
-      email = db.Column(db.String(150), unique=True)
-      motivation = db.Column(db.Enum(Level))
-      Ability = db.Column(db.Enum(Level)) 
-    #   type = db.Column(db.Enum(ActorType))
-    #   acts = db.relationship('Gratitudeact')
-      user = db.Column(db.Integer, db.ForeignKey('user.id'))      
+# class Actor(db.Model):
+#       id = db.Column(db.Integer, primary_key=True)
+#     #   name = db.Column(db.String(1000))
+#     #   email = db.Column(db.String(150), unique=True)
+#       motivation = db.Column(db.Enum(Level))
+#       Ability = db.Column(db.Enum(Level)) 
+#     #   type = db.Column(db.Enum(ActorType))
+#     #   acts = db.relationship('Gratitudeact')
+#       user = db.Column(db.Integer, db.ForeignKey('user.id'))      
 
 class Giver(db.Model):
       id = db.Column(db.Integer, primary_key=True)
-      name = db.Column(db.String(1000))
-      email = db.Column(db.String(150), unique=True)
+    #   name = db.Column(db.String(1000))
+    #   email = db.Column(db.String(150), unique=True)
       motivation = db.Column(db.Enum(Level))
       Ability = db.Column(db.Enum(Level)) 
     #   type = db.Column(db.Enum(ActorType))
     #   acts = db.relationship('Gratitudeact')
-      user = db.Column(db.Integer, db.ForeignKey('user.id'))
+      user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+      
+      def getName(self):
+          user  = User.query.filter_by(id=self.user_id).first()
+          if user is not None:
+              return user.name 
+      
+      def getEmail(self):
+          user  = User.query.filter_by(id=self.user_id).first()
+          if user is not None:
+              return user.email 
       
         
 class Receiver(db.Model):
       id = db.Column(db.Integer, primary_key=True)
-      name = db.Column(db.String(1000))
-      email = db.Column(db.String(150), unique=True)
+    #   name = db.Column(db.String(1000))
+    #   email = db.Column(db.String(150), unique=True)
       motivation = db.Column(db.Enum(Level))
       Ability = db.Column(db.Enum(Level)) 
     #   type = db.Column(db.Enum(ActorType))
@@ -107,6 +117,7 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(150), unique=True)
     password = db.Column(db.String(150))
     name = db.Column(db.String(150))
-    actor = db.relationship('Actor')
+    giver = db.relationship('Giver')
+    receiver = db.relationship('Receiver')
     
        

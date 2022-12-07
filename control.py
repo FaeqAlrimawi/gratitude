@@ -9,10 +9,10 @@ sender_email = "kindness.computing@gmail.com"
 
 def test():
     
-    # fillWithDummyData()
+    fillWithDummyData()
     
-    giver = Giver.query.filter_by(name="Faeq").first()
-    receiver = Receiver.query.filter_by(name="Tom").first()
+    giver = Giver.query.first()
+    # receiver = Receiver.query.filter_by(name="Tom").first()
     
     gratAct = Gratitudeact.query.first()
     # print("grat: ", gratAct.message)
@@ -28,7 +28,10 @@ def sendEmailToGiver(giver, gratitudeAct):
         print("no giver")
         return
     
-    if giver.email is None or giver.email == "":
+    giverEmail = giver.getEmail()
+    giverName = giver.getName()
+    
+    if giverEmail is None or giverEmail == "":
         print("no email found")
         return
     
@@ -43,8 +46,8 @@ def sendEmailToGiver(giver, gratitudeAct):
     ### email content construction: plain text
  
    
-    gratEmail = GratitudeEmail(recipientName=giver.name, recipientEmail=giver.email, gratitudeMessage=gratitude_msg, greetings="Good Evening", ender="Thank you for brightening one's day!")
-    gratEmail.setHTMLContent(None)
+    gratEmail = GratitudeEmail(recipientName=giverName, recipientEmail=giverEmail, gratitudeMessage=gratitude_msg, greetings="Good Evening", ender="Thank you for brightening one's day!")
+    # gratEmail.setHTMLContent(None)
     emailHandler = EmailHandler()
     emailHandler.sendGratitudeEmail(gratEmail)  
   
@@ -57,11 +60,12 @@ def fillWithDummyData():
     db.session.commit()
     
     ## giver and receiver
-    giver = Giver(name="Faeq", email="faeq.rimawi@gmail.com")
-    receiver = Receiver(name="Tom")
+    user = User.query.first()
+    giver = Giver(user_id=user.id)
+    # receiver = Receiver(name="Tom")
     
     db.session.add(giver)
-    db.session.add(receiver)
+    # db.session.add(receiver)
     db.session.commit()
     # return    
     

@@ -92,6 +92,7 @@ class GratitudeEmail:
     
     {}
     
+    
     {}
     """.format(self.greetings, self.recipientName, content, self.ender, self.signature)
           
