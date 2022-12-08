@@ -15,7 +15,7 @@ def home():
     myEmail="faeq.rimawi@gmail.com"
          
     if User.query.filter_by(email=str(myEmail)).first() is None: 
-        new_user = User(email=myEmail, name="faeq", password=generate_password_hash("asd12345", method='sha256'))
+        new_user = User(email=myEmail, name="Faeq", password=generate_password_hash("asd12345", method='sha256'))
         db.session.add(new_user)
         db.session.commit()
         login_user(new_user, remember=True)

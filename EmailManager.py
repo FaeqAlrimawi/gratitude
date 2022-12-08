@@ -9,7 +9,7 @@ from email.mime.multipart import MIMEMultipart
 ##### GRATITUDE EMAIL
 ## Special class to construct gratitude emails
 class GratitudeEmail:
-    def __init__(self, recipientEmail, subject="Be Thankful today!", recipientName="Gratituder",  greetings="Hi", gratitudeMessage="I appreciate the work you have been doing", gratitudeTree="https://gratitude-tree.org/", ender="Best wishes", signature="Kind Computing"):
+    def __init__(self, recipientEmail: str, subject="Be Thankful today!", recipientName="Gratituder",  greetings="Hi", gratitudeMessage="I appreciate the work you have been doing", gratitudeTree="https://gratitude-tree.org/", ender="Best wishes", signature="<br><br>--<br>Kind Computing"):
         self.subject = subject
         self.recipientName = recipientName
         self.recipientEmail = recipientEmail
@@ -33,7 +33,11 @@ class GratitudeEmail:
     
         self.plainContent = """How about doing a Gratitude act of the day? you add a leaf, saying "{}", on the gratitude tree ({})
         """.format(self.gratitudeMessage, self.gratitudeTree)
-      
+    
+    def setRecipientEmailAndName(self, recipientEmail, recipientName):
+        self.recipientEmail = recipientEmail
+        self.recipientName = recipientName
+          
     def setGratitudeTreeLink(self, grattitudeTreeLink):
         self.gratitudeTree = grattitudeTreeLink
             
