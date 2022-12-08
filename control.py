@@ -3,28 +3,54 @@ from __init__ import db
 from werkzeug.security import generate_password_hash
 from EmailManager import GratitudeEmail, EmailHandler
 import random
+import schedule
+import datetime as dt
+import time
 
-server = None
-sender_email = "kindness.computing@gmail.com"
+# server = None
+# sender_email = "kindness.computing@gmail.com"
 
 
 def test():
     
-    fillWithDummyData()
+    # fillWithDummyData()
     
     givers = Giver.query.all()
     # receiver = Receiver.query.filter_by(name="Tom").first()
-    # print(givers)
+    print(givers)
     
-    gratAct = Gratitudeact.query.first()
+    gratAct = Gratitudeact.query.all()
+    print(gratAct)
     # print("grat: ", gratAct.message)
     # actors = Actor.query.all()
     
-    sendGratitudeEmailToGivers(givers)
+    sendGratitudeEmailToGivers_at(givers, repeat="once", send_time="18:00:00")
     # print(giver.name,giver.email)
     
+
+def sendGratitudeEmailToGivers_at(givers, gratitudeAct="random", repeat="once", send_time="now"): 
+     
+    match repeat:
+            case "once":
+                if send_time == "now":
+                    sendGratitudeEmailToGivers(givers, gratitudeAct)
+                else:        
+                    time.sleep(time.time() - time.time())
+                    sendGratitudeEmailToGivers(givers, gratitudeAct)
+            case "daily":
+                schedule.every(30).seconds.do(sendGratitudeEmailToGivers(givers, gratitudeAct))  
     
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+           
 def sendGratitudeEmailToGivers(givers, gratitudeAct="random"):
+    
+    ### repeat parameter takes:
+    # once: happens once at the given time
+    # daily: at the given time every day
+    # weekly: every week the given time
+    
     
     if givers is None:
         print("No givers. Please provide at least one giver")
@@ -32,6 +58,7 @@ def sendGratitudeEmailToGivers(givers, gratitudeAct="random"):
     
     emailHandler = EmailHandler()
     
+     
     if type(givers) is not list: givers = [givers]
     
     for giver in givers:
@@ -58,17 +85,22 @@ def sendGratitudeEmailToGivers(givers, gratitudeAct="random"):
         ### email content construction: plain text
         gratEmail = GratitudeEmail(recipientName=giverName, recipientEmail=giverEmail, gratitudeMessage=gratitude_msg, greetings="Good Evening", ender="Thank you for brightening one's day!")
         # gratEmail.setHTMLContent(None)
-        emailHandler.sendGratitudeEmail(gratEmail)  
+        
+        ## schedule send
+        
+        emailHandler.sendGratitudeEmail(gratEmail) 
   
     
 def fillWithDummyData():
     
     ##gratitude act
-    msg = "I appreciate your work on the event :)"
-    if Gratitudeact.query.filter_by(message=msg).first() is None:
-        gratAct = Gratitudeact(message=msg)
-        db.session.add(gratAct)
-        db.session.commit()
+    msgs = ["I appreciate your work on the event :)", "Thank you very much for all the hard work", "What an amazing person you are!"]
+    
+    for msg in msgs:
+        if Gratitudeact.query.filter_by(message=msg).first() is None:
+            gratAct = Gratitudeact(message=msg)
+            db.session.add(gratAct)
+            db.session.commit()
     
     ## first user
     gmailUser = addUser(name="Faeq", email="faeq.rimawi@gmail.com", password="asd123")
