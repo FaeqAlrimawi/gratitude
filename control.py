@@ -35,6 +35,7 @@ def sendGratitudeEmailToGivers_at(givers, gratitudeAct="random", repeat="once", 
                 if send_time == "now":
                     sendGratitudeEmailToGivers(givers, gratitudeAct)
                 else:        
+                    #TODO: FIX this
                     time.sleep(time.time() - time.time())
                     sendGratitudeEmailToGivers(givers, gratitudeAct)
             case "daily":
