@@ -6,10 +6,15 @@ import random
 import schedule
 import datetime as dt
 import time
+from utils.time import get_seconds
+import threading 
+# from uwsgidecorators import thread 
+from flask_restful import Resource
 
 # server = None
 # sender_email = "kindness.computing@gmail.com"
-
+givers_global = None
+gratitudeAct_global = None
 
 def test():
     
@@ -24,7 +29,7 @@ def test():
     # print("grat: ", gratAct.message)
     # actors = Actor.query.all()
     
-    sendGratitudeEmailToGivers_at(givers, repeat="once", send_time="18:00:00")
+    sendGratitudeEmailToGivers_at(givers, repeat="once", send_time="15:46:00")
     # print(giver.name,giver.email)
     
 
@@ -36,23 +41,39 @@ def sendGratitudeEmailToGivers_at(givers, gratitudeAct="random", repeat="once", 
                     sendGratitudeEmailToGivers(givers, gratitudeAct)
                 else:        
                     #TODO: FIX this
-                    time.sleep(time.time() - time.time())
+                    hh, mm, ss = send_time.split(':')
+                    send_time_obj = dt.datetime(year=dt.date.today().year, month=dt.date.today().month, day=dt.date.today().day, hour=int(hh), minute=int(mm), second=int(ss))
+                    now_time = dt.datetime.today()
+                    time_diff = (send_time_obj - now_time).total_seconds()
+                    print(time_diff)
+                    # time.sleep(time_dff)
+                    global givers_global
+                    global gratitudeAct_global
+                    
+                    givers_global = givers
+                    gratitudeAct_global = gratitudeAct
+                    # thread = threading.Thread(target=sendGratitudeEmailToGivers, args=(givers_global, gratitudeAct_global))
+                    # thread.daemon = True
+                    # thread.start()
                     sendGratitudeEmailToGivers(givers, gratitudeAct)
             case "daily":
                 schedule.every(30).seconds.do(sendGratitudeEmailToGivers(givers, gratitudeAct))  
     
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
-           
-def sendGratitudeEmailToGivers(givers, gratitudeAct="random"):
+                while True:
+                    schedule.run_pending()
+                    time.sleep(1)
+    # time.sleep(10)                   
+                   
+def sendGratitudeEmailToGivers(givers, gratitudeAct="random", waiting_time=0):
     
     ### repeat parameter takes:
     # once: happens once at the given time
     # daily: at the given time every day
     # weekly: every week the given time
-    
-    
+  
+    if waiting_time >0:
+        time.sleep(waiting_time)
+        
     if givers is None:
         print("No givers. Please provide at least one giver")
         return
@@ -149,3 +170,4 @@ def getRandomGratitudeAct() -> Gratitudeact:
     
     print(Gratitudeact.query.count())
     return random.choice(Gratitudeact.query.all())
+

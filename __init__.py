@@ -1,19 +1,28 @@
 from venv import create
 from flask import Flask
+# from flask_restful import Resource, Api
 from flask_sqlalchemy import SQLAlchemy
 from os import path
 from flask_login import LoginManager, login_manager
-
+from flask_mail import Mail
 
 
 
 db = SQLAlchemy()
 DB_NAME = "database.db"
-
+mail = None
 
 def create_app():
-    app = Flask(__name__)
+    global mail
+    app = Flask(__name__)    
     app.config['SECRET_KEY'] = 'sdlgjfaiowejklvmd4%$%^DFSFD8979iJGHNDS5wgfb&^*HGHDt67dHSRTEGZHSftyretz' ## secret key
+    app.config['MAIL_SERVER']='smtp.gmail.com'
+    app.config['MAIL_PORT'] = 465
+    app.config['MAIL_USERNAME'] = 'kindness.computing'
+    app.config['MAIL_PASSWORD'] = "gjpqocclovspawrx"
+    app.config['MAIL_USE_TLS'] = False
+    app.config['MAIL_USE_SSL'] = True # True if Port = 465
+    mail = Mail(app)
     
     # where the data
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
@@ -48,8 +57,9 @@ def create_app():
 
 
 def create_database(app):
-    # if not path.exists(DB_NAME):
+    if not path.exists(DB_NAME):
         db.create_all(app=app)
+        # db.create_scoped_session()
         print('### created database')
         
 
