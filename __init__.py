@@ -5,16 +5,18 @@ from flask_sqlalchemy import SQLAlchemy
 from os import path
 from flask_login import LoginManager, login_manager
 from flask_mail import Mail
-
+from celery import Celery
 
 
 db = SQLAlchemy()
 DB_NAME = "database.db"
 mail = None
-
+app = Flask(__name__) 
+celery = Celery(app.name, broker='redis://localhost:6379/0')
+ 
 def create_app():
     global mail
-    app = Flask(__name__)    
+    global app  
     app.config['SECRET_KEY'] = 'sdlgjfaiowejklvmd4%$%^DFSFD8979iJGHNDS5wgfb&^*HGHDt67dHSRTEGZHSftyretz' ## secret key
     app.config['MAIL_SERVER']='smtp.gmail.com'
     app.config['MAIL_PORT'] = 465

@@ -1,8 +1,8 @@
-from flask import Blueprint, render_template, request, flash
+from flask import Blueprint, render_template, request, flash, current_app
 from flask_login import current_user, login_user
 from models import User
 from werkzeug.security import generate_password_hash
-from __init__ import db, mail
+from __init__ import db, app
 from control import test,addUser
 import threading
 from flask_mail import Message, Mail
@@ -23,7 +23,9 @@ def home():
         login_user(new_user, remember=True)
     
     # threading.Timer(interval=5, function=test).start()
+    # with app.app_context():
     sendMessage()
+    
     return render_template("home.html", user=current_user)
 
 def sendMessage():
@@ -36,8 +38,13 @@ def sendMessage():
     msg.setHTMLContent(render_template("email_page.html", gratitudeMessage=msg.gratitudeMessage, gratitudeTreeLink=msg.gratitudeTree))
    
     emailHandler = EmailHandler()
+    # print("whaaat")
     emailHandler.sendGratitudeEmail(msg)
-    return "Your email has been sent!"
+    # thread = threading.Timer(interval=5, function=emailHandler.sendGratitudeEmail, args=(msg,))
+    # thread.daemon=True
+    # thread.start()
+    
+# return "Your email has been sent!"
        
 @views.route("/get-involved", methods=["GET", "POST"])
 def signUp():    
@@ -58,3 +65,15 @@ def signUp():
     
         
     return render_template("get_involved.html", user=current_user)
+
+
+@views.route("/view-email", methods=["POST", "GET"])
+def viewEmail():
+    msg = GratitudeEmail( recipients = ['faeq.rimawi@gmail.com'], recipientName="Faeq", greetings="good evening", gratitudeTree="https://gratitude-tree.org/tree_viewer/global-payroll-greater-goods-gratitude-tree")
+        # msg.body = "Hello Flask message sent from Flask-Mail"
+        # You can also use msg.html to send html templates!
+    # Example:
+    # msg.html = render_template("hello.html") # Template should be in 'templates' folder
+    
+    return render_template("email_page.html", gratitudeMessage=msg.gratitudeMessage, gratitudeTreeLink=msg.gratitudeTree)
+   
