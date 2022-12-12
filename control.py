@@ -1,84 +1,49 @@
 from models import Gratitudeact, Giver, Receiver, User
 from __init__ import db
 from werkzeug.security import generate_password_hash
-from EmailManager import GratitudeEmail, EmailHandler
+from EmailHandler import GratitudeEmail, EmailHandler
 import random
-import schedule
-import datetime as dt
-import time
-from utils.time import get_seconds
-import threading 
-# from uwsgidecorators import thread 
-from flask_restful import Resource
+from apscheduler.events import EVENT_JOB_MISSED 
+from __init__ import scheduler
+from flask import render_template 
+from datetime import datetime, timedelta
 
+
+
+emailHandler = EmailHandler()
+jobs = []
 # server = None
 # sender_email = "kindness.computing@gmail.com"
-givers_global = None
-gratitudeAct_global = None
+# givers_global = None
+# gratitudeAct_global = None
 
 def test():
     
     # fillWithDummyData()
-    
+
     givers = Giver.query.all()
+    num = 20
     # receiver = Receiver.query.filter_by(name="Tom").first()
-    print(givers)
+    print("send to: ", len(givers[:num]))
     
-    gratAct = Gratitudeact.query.all()
-    print(gratAct)
+    # getRandomGratitudeAct()
+    # gratAct = Gratitudeact.query.all()
+    # print(gratAct)
     # print("grat: ", gratAct.message)
     # actors = Actor.query.all()
+    # send_time = datetime(2022,12,12,14,20,00)
+    sendGratitudeEmailToGivers(givers[:num])
     
-    sendGratitudeEmailToGivers_at(givers, repeat="once", send_time="15:46:00")
     # print(giver.name,giver.email)
-    
-
-def sendGratitudeEmailToGivers_at(givers, gratitudeAct="random", repeat="once", send_time="now"): 
-     
-    match repeat:
-            case "once":
-                if send_time == "now":
-                    sendGratitudeEmailToGivers(givers, gratitudeAct)
-                else:        
-                    #TODO: FIX this
-                    hh, mm, ss = send_time.split(':')
-                    send_time_obj = dt.datetime(year=dt.date.today().year, month=dt.date.today().month, day=dt.date.today().day, hour=int(hh), minute=int(mm), second=int(ss))
-                    now_time = dt.datetime.today()
-                    time_diff = (send_time_obj - now_time).total_seconds()
-                    print(time_diff)
-                    # time.sleep(time_dff)
-                    global givers_global
-                    global gratitudeAct_global
-                    
-                    givers_global = givers
-                    gratitudeAct_global = gratitudeAct
-                    # thread = threading.Thread(target=sendGratitudeEmailToGivers, args=(givers_global, gratitudeAct_global))
-                    # thread.daemon = True
-                    # thread.start()
-                    sendGratitudeEmailToGivers(givers, gratitudeAct)
-            case "daily":
-                schedule.every(30).seconds.do(sendGratitudeEmailToGivers(givers, gratitudeAct))  
-    
-                while True:
-                    schedule.run_pending()
-                    time.sleep(1)
-    # time.sleep(10)                   
                    
-def sendGratitudeEmailToGivers(givers, gratitudeAct="random", waiting_time=0):
-    
-    ### repeat parameter takes:
-    # once: happens once at the given time
-    # daily: at the given time every day
-    # weekly: every week the given time
-  
-    if waiting_time >0:
-        time.sleep(waiting_time)
+                   
+def sendGratitudeEmailToGivers(givers, gratitudeAct="random", send_time=None):
         
     if givers is None:
         print("No givers. Please provide at least one giver")
         return
     
-    emailHandler = EmailHandler()
+    # emailHandler = EmailHandler()
     
      
     if type(givers) is not list: givers = [givers]
@@ -92,12 +57,11 @@ def sendGratitudeEmailToGivers(givers, gratitudeAct="random", waiting_time=0):
         
         if giverEmail is None or giverEmail == "":
             print("no email found for Giver: {}".format(giverName))
-            return
+            continue
         
         if type(gratitudeAct) is Gratitudeact:
             gratitude_msg = gratitudeAct.message
         elif type(gratitudeAct) is str and gratitudeAct == "random":
-            #TODO: Select random act
             randGratitudeAct = getRandomGratitudeAct()
             
             gratitude_msg = randGratitudeAct.message if randGratitudeAct is not None else "Thank you!" 
@@ -105,14 +69,53 @@ def sendGratitudeEmailToGivers(givers, gratitudeAct="random", waiting_time=0):
             gratitude_msg = "Thank you!" # default gratitude message
                 
         ### email content construction: plain text
-        gratEmail = GratitudeEmail(recipientName=giverName, recipientEmail=giverEmail, gratitudeMessage=gratitude_msg, greetings="Good Evening", ender="Thank you for brightening one's day!")
+        gratEmail = GratitudeEmail(recipientName=giverName, recipients=giverEmail, gratitudeMessage=gratitude_msg, greetings="Good Evening", ender="Thank you for brightening one's day!")
         # gratEmail.setHTMLContent(None)
-        
+        gratEmail.setHTMLContent(render_template("email_page.html", gratitudeMessage=gratEmail.gratitudeMessage, gratitudeTreeLink=gratEmail.gratitudeTree))
         ## schedule send
         
-        emailHandler.sendGratitudeEmail(gratEmail) 
-  
+        if send_time is None: # send in a random time between 1 and the number 120 (avoid sending all at the same time)
+            new_send_time = datetime.now() + timedelta(seconds=random.randint(1, 60))
+            
+            # print(new_send_time)
+        
+        scheduled_email(gratEmail,new_send_time) 
     
+    # print_jobs()
+  
+ 
+# def print_jobs():
+#     print(jobs)
+     
+ # @sched.scheduled_job('cron', day_of_week='mon-fri', hour=18)
+def scheduled_email(gratitudeEmail, send_time):  
+    
+    # print("whaaat")
+    emailHandler = EmailHandler()
+    # in case it misses the job give it a next time with a random period of max. 120 seconds
+    # next_run_time = send_time + timedelta(seconds=random.randint(1, 120))
+    
+    hour, min, sec, microsec = send_time.hour, send_time.minute, send_time.second, send_time.microsecond
+    
+    print(hour, min, sec, microsec)
+    
+    ## trigger can be: 
+    # date: run the job just once at a certain point of time,
+    # interval: run the job at fixed intervals of time, or 
+    # cron: run the job periodically at certain time(s) of day.
+    # One can implement their own trigger. 
+    ## misfire_grace_time is None meaning it will try to send the email (do the job) as soon as it can
+    jobs.append(scheduler.add_job(emailHandler.sendGratitudeEmail, trigger='cron', day_of_week='mon',hour=hour, minute=min, second=sec,   args=[gratitudeEmail],  name="{}:{}".format(gratitudeEmail.recipients, send_time)))
+    scheduler.add_listener(schedule_listener, EVENT_JOB_MISSED)
+    # print("Email scheduled to send: \nAt: {} (next run: {}), \nTo: {}".format(send_time, next_run_time, gratitudeEmail.recipients))
+    
+    # emailHandler.sendGratitudeEmail(msg)
+# sched.start()
+
+def schedule_listener(event):
+    ##TODO: listen to event_job_missed
+    print(event)
+       
 def fillWithDummyData():
     
     ##gratitude act
@@ -132,13 +135,15 @@ def fillWithDummyData():
     leroUser = addUser(name="Lero", email="faeq.alrimawi@lero.ie", password="asd123")
     leroUser = getUser("faeq.alrimawi@lero.ie") if leroUser is None else None
     
-    if Giver.query.filter_by(user_id=gmailUser.id).first() is None:
+    # if Giver.query.filter_by(user_id=gmailUser.id).first() is None:
+    # for testing
+    for i in range(70):
         gmailGiver = Giver(user_id=gmailUser.id) 
         db.session.add(gmailGiver)
     
-    if Giver.query.filter_by(user_id=leroUser.id).first() is None:        
-        leroGiver = Giver(user_id=leroUser.id)
-        db.session.add(leroGiver)
+    # if Giver.query.filter_by(user_id=leroUser.id).first() is None:        
+    #     leroGiver = Giver(user_id=leroUser.id)
+    #     db.session.add(leroGiver)
         
     db.session.commit()
     
@@ -167,7 +172,10 @@ def getUser(email) -> User:
 
 
 def getRandomGratitudeAct() -> Gratitudeact:
+    ##TODO: look for a better way
     
-    print(Gratitudeact.query.count())
-    return random.choice(Gratitudeact.query.all())
+    # for grat in Gratitudeact.query.all():
+    #     print(grat.id)
+        
+    return Gratitudeact.query.get(random.randint(1, Gratitudeact.query.count()))
 

@@ -14,6 +14,7 @@ lock = threading.Lock()
 class GratitudeEmail(Message):
     def __init__(self, sender="kindness.computing@gmail.com", recipients = None, subject="Be Thankful today!", recipientName="Gratituder",  greetings="Hi", gratitudeMessage="I appreciate the work you have been doing", gratitudeTree="https://gratitude-tree.org/", ender="Best wishes", signature="<br><br>--<br>Kind Computing"):
         super(GratitudeEmail, self).__init__(subject=subject, recipients=recipients, sender=sender)
+        self.recipients = recipients if type(recipients) is list else [recipients]
         self.recipientName = recipientName
         self.greetings = greetings
         self.gratitudeMessage = gratitudeMessage     
@@ -82,9 +83,11 @@ class EmailHandler:
         try:
             with app.app_context():
                 # print("sending message to: ", recipientEmail)
-                print("msg to: ", message.recipients)
+                # print(message)
+                # print("EmailHandler->email: sending email to: ", message.recipients)
+                # mail.connect()
                 mail.send(message)
-                print("done sending")
+                # print("EmailHandler->email: done sending")
         except Exception as e:
             # Print any error messages to stdout
             print(e)

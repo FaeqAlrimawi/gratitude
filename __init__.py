@@ -5,18 +5,28 @@ from flask_sqlalchemy import SQLAlchemy
 from os import path
 from flask_login import LoginManager, login_manager
 from flask_mail import Mail
-from celery import Celery
+# from celery import Celery
+from pytz import utc
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
+import atexit
+from  datetime import datetime, timedelta
+import random 
 
 
 db = SQLAlchemy()
 DB_NAME = "database.db"
 mail = None
 app = Flask(__name__) 
-celery = Celery(app.name, broker='redis://localhost:6379/0')
+scheduler = None
+# celery = Celery(app.name, broker='redis://localhost:6379/0')
  
 def create_app():
     global mail
     global app  
+    global scheduler
+    
     app.config['SECRET_KEY'] = 'sdlgjfaiowejklvmd4%$%^DFSFD8979iJGHNDS5wgfb&^*HGHDt67dHSRTEGZHSftyretz' ## secret key
     app.config['MAIL_SERVER']='smtp.gmail.com'
     app.config['MAIL_PORT'] = 465
@@ -29,7 +39,10 @@ def create_app():
     # where the data
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
     
+    # init scheduler
+    scheduler = init_scheduler()
     # initialise DB
+    
     db.init_app(app)
 
     
@@ -64,4 +77,42 @@ def create_database(app):
         # db.create_scoped_session()
         print('### created database')
         
+def init_scheduler():
+    jobstores = {
+    # 'mongo': MongoDBJobStore(),
+    'default': SQLAlchemyJobStore(url=app.config['SQLALCHEMY_DATABASE_URI'])
+    }
+    executors = {
+        'default': ThreadPoolExecutor(10), # more can cause "connection unexpectedly closed" 
+        'processpool': ProcessPoolExecutor(1) # more can cause "connection unexpectedly closed" 
+    }
+    job_defaults = {
+        'coalesce': False,
+        'max_instances': 3,
+        'misfire_grace_time': None
+    }
 
+    scheduler = BackgroundScheduler(jobstores=jobstores, executors=executors, job_defaults=job_defaults, timezone=utc)
+    # sched.add_jobstore('sqlalchemy', url=app.config['SQLALCHEMY_DATABASE_URI'])
+    
+    scheduler.start()
+    
+    if scheduler is not None:
+        pendingJobs = scheduler.get_jobs()
+        if len(pendingJobs) > 0:
+            print("pending/scheduled jobs: ", scheduler.get_jobs())
+            # for pendingJob in pendingJobs:
+            #     print("resume job-name: ", pendingJob.name)
+            #     new_run_time = datetime.now() + timedelta(seconds=random.randint(1, 60))
+            #     pendingJob.reschedule(trigger="date", run_date=new_run_time)
+                # scheduler.reschedule_job
+    
+    # atexit.register(lambda: scheduler.shutdown())
+     
+    return scheduler
+
+
+@atexit.register
+def exit():
+    print("existing and shutting down the scheduuler.")
+    scheduler.shutdown()
