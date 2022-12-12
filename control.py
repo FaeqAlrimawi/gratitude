@@ -1,10 +1,10 @@
 from models import Gratitudeact, Giver, Receiver, User
-from __init__ import db
+from __init__ import db, scheduler
 from werkzeug.security import generate_password_hash
 from EmailHandler import GratitudeEmail, EmailHandler
 import random
 from apscheduler.events import EVENT_JOB_MISSED 
-from __init__ import scheduler
+# from __init__ import scheduler
 from flask import render_template 
 from datetime import datetime, timedelta
 
@@ -83,7 +83,7 @@ def sendGratitudeEmailToGivers(givers, gratitudeAct="random", send_time=None):
     
     # print_jobs()
   
- 
+    # exit()
 # def print_jobs():
 #     print(jobs)
      
@@ -97,7 +97,7 @@ def scheduled_email(gratitudeEmail, send_time):
     
     hour, min, sec, microsec = send_time.hour, send_time.minute, send_time.second, send_time.microsecond
     
-    print(hour, min, sec, microsec)
+    # print(hour, min, sec, microsec)
     
     ## trigger can be: 
     # date: run the job just once at a certain point of time,

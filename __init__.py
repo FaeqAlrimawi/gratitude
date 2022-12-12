@@ -17,15 +17,15 @@ import random
 
 db = SQLAlchemy()
 DB_NAME = "database.db"
-mail = None
+mail = None 
 app = Flask(__name__) 
 scheduler = None
 # celery = Celery(app.name, broker='redis://localhost:6379/0')
  
 def create_app():
+    # print("################### CREATING APP")
     global mail
     global app  
-    global scheduler
     
     app.config['SECRET_KEY'] = 'sdlgjfaiowejklvmd4%$%^DFSFD8979iJGHNDS5wgfb&^*HGHDt67dHSRTEGZHSftyretz' ## secret key
     app.config['MAIL_SERVER']='smtp.gmail.com'
@@ -40,7 +40,7 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
     
     # init scheduler
-    scheduler = init_scheduler()
+    init_scheduler()
     # initialise DB
     
     db.init_app(app)
@@ -76,8 +76,17 @@ def create_database(app):
         db.create_all(app=app)
         # db.create_scoped_session()
         print('### created database')
+  
         
 def init_scheduler():
+    global scheduler
+    
+    if scheduler is not None:
+        return 
+    
+    print("##### initializing scheduler ######")
+   
+
     jobstores = {
     # 'mongo': MongoDBJobStore(),
     'default': SQLAlchemyJobStore(url=app.config['SQLALCHEMY_DATABASE_URI'])
@@ -100,19 +109,23 @@ def init_scheduler():
     if scheduler is not None:
         pendingJobs = scheduler.get_jobs()
         if len(pendingJobs) > 0:
-            print("pending/scheduled jobs: ", scheduler.get_jobs())
+            print("scheduled jobs: ", scheduler.get_jobs())
+            # print("############ CLEARING SCHEDULE")
+            # scheduler.remove_all_jobs()
             # for pendingJob in pendingJobs:
             #     print("resume job-name: ", pendingJob.name)
-            #     new_run_time = datetime.now() + timedelta(seconds=random.randint(1, 60))
-            #     pendingJob.reschedule(trigger="date", run_date=new_run_time)
+                # new_run_time = datetime.now() + timedelta(seconds=random.randint(1, 60))
+                # pendingJob.reschedule(trigger="date", run_date=new_run_time)
                 # scheduler.reschedule_job
-    
+                # pendingJob.resume()  
     # atexit.register(lambda: scheduler.shutdown())
      
+   
+      
     return scheduler
 
 
 @atexit.register
 def exit():
     print("existing and shutting down the scheduuler.")
-    scheduler.shutdown()
+    scheduler.shutdown() if scheduler is not None else None
