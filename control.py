@@ -22,7 +22,7 @@ def test():
     # fillWithDummyData()
 
     givers = Giver.query.all()
-    num = 20
+    num = 1
     # receiver = Receiver.query.filter_by(name="Tom").first()
     print("send to: ", len(givers[:num]))
     
@@ -95,8 +95,9 @@ def scheduled_email(gratitudeEmail, send_time):
     # in case it misses the job give it a next time with a random period of max. 120 seconds
     # next_run_time = send_time + timedelta(seconds=random.randint(1, 120))
     
-    hour, min, sec, microsec = send_time.hour, send_time.minute, send_time.second, send_time.microsecond
-    
+    hour, min, sec, microsec = 12,0,0, 0 #send_time.hour, send_time.minute, send_time.second, send_time.microsecond
+    start_date = "2022-12-13"
+    end_date = "2022-12-19"
     # print(hour, min, sec, microsec)
     
     ## trigger can be: 
@@ -105,7 +106,8 @@ def scheduled_email(gratitudeEmail, send_time):
     # cron: run the job periodically at certain time(s) of day.
     # One can implement their own trigger. 
     ## misfire_grace_time is None meaning it will try to send the email (do the job) as soon as it can
-    jobs.append(scheduler.add_job(emailHandler.sendGratitudeEmail, trigger='cron', day_of_week='mon',hour=hour, minute=min, second=sec,   args=[gratitudeEmail],  name="{}:{}".format(gratitudeEmail.recipients, send_time)))
+    
+    jobs.append(scheduler.add_job(emailHandler.sendGratitudeEmail, trigger='cron', start_date=start_date, end_date=end_date, day_of_week="mon-fri", hour=hour, minute=min, second=sec, jitter=120,  args=[gratitudeEmail],  name="{}:{}".format(gratitudeEmail.recipients, send_time)))
     scheduler.add_listener(schedule_listener, EVENT_JOB_MISSED)
     # print("Email scheduled to send: \nAt: {} (next run: {}), \nTo: {}".format(send_time, next_run_time, gratitudeEmail.recipients))
     
