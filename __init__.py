@@ -30,8 +30,8 @@ def create_app():
     app.config['SECRET_KEY'] = 'sdlgjfaiowejklvmd4%$%^DFSFD8979iJGHNDS5wgfb&^*HGHDt67dHSRTEGZHSftyretz' ## secret key
     app.config['MAIL_SERVER']='smtp.gmail.com'
     app.config['MAIL_PORT'] = 465
-    app.config['MAIL_USERNAME'] = 'kindness.computing'
-    app.config['MAIL_PASSWORD'] = "gjpqocclovspawrx"
+    app.config['MAIL_USERNAME'] = 'frimawi22' #kindness.computing'
+    app.config['MAIL_PASSWORD'] = "btyjwvwbjayokoug" #"gjpqocclovspawrx"
     app.config['MAIL_USE_TLS'] = False
     app.config['MAIL_USE_SSL'] = True # True if Port = 465
     mail = Mail(app)
@@ -119,8 +119,8 @@ def init_scheduler():
                 # scheduler.reschedule_job
                 # pendingJob.resume()  
     # atexit.register(lambda: scheduler.shutdown())
-     
-   
+      
+    
       
     return scheduler
 

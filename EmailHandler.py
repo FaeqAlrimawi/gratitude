@@ -4,6 +4,8 @@ from email.mime.multipart import MIMEMultipart
 from flask_mail import Message
 from __init__ import mail, app
 import threading
+from datetime import datetime
+
 
 lock = threading.Lock()
 
@@ -87,7 +89,7 @@ class EmailHandler:
                 # print("EmailHandler->email: sending email to: ", message.recipients)
                 # mail.connect()
                 mail.send(message)
-                # print("EmailHandler->email: done sending")
+                print("EmailHandler->email: sent to {} at {}".format(message.recipients, datetime.now()))
         except Exception as e:
             # Print any error messages to stdout
             print(e)

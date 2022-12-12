@@ -4,7 +4,6 @@ from werkzeug.security import generate_password_hash
 from EmailHandler import GratitudeEmail, EmailHandler
 import random
 from apscheduler.events import EVENT_JOB_MISSED 
-# from __init__ import scheduler
 from flask import render_template 
 from datetime import datetime, timedelta
 
@@ -74,30 +73,40 @@ def sendGratitudeEmailToGivers(givers, gratitudeAct="random", send_time=None):
         gratEmail.setHTMLContent(render_template("email_page.html", gratitudeMessage=gratEmail.gratitudeMessage, gratitudeTreeLink=gratEmail.gratitudeTree))
         ## schedule send
         
-        if send_time is None: # send in a random time between 1 and the number 120 (avoid sending all at the same time)
+        if send_time is None: # send in a random time between 1 and the number 60 (avoid sending all at the same time)
             new_send_time = datetime.now() + timedelta(seconds=random.randint(1, 60))
             
             # print(new_send_time)
         
-        scheduled_email(gratEmail,new_send_time) 
+        # schedule_email_test(gratEmail,new_send_time)
+        schedule_email(gratEmail, end_date=datetime.today()+timedelta(days=1)) 
     
-    # print_jobs()
-  
-    # exit()
-# def print_jobs():
-#     print(jobs)
+
      
  # @sched.scheduled_job('cron', day_of_week='mon-fri', hour=18)
-def scheduled_email(gratitudeEmail, send_time):  
+def schedule_email(gratitudeEmail, start_date=None, end_date=None, send_time=None):  
     
-    # print("whaaat")
+
     emailHandler = EmailHandler()
-    # in case it misses the job give it a next time with a random period of max. 120 seconds
-    # next_run_time = send_time + timedelta(seconds=random.randint(1, 120))
-    
-    hour, min, sec, microsec = 12,0,0, 0 #send_time.hour, send_time.minute, send_time.second, send_time.microsecond
-    start_date = "2022-12-13"
-    end_date = "2022-12-19"
+
+    ## set dates
+    # if start_date is None: # default start date is today
+    #     start_date = datetime.today()
+        
+    # if end_date is None: # default end date is tomorrow    
+    #     end_date = start_date + timedelta(days=1)
+        
+    # print(start_date, end_date)  
+     
+    ## set time
+    if send_time is not None:
+        hour, min, sec = send_time.hour, send_time.minute, send_time.second, send_time.microsecond
+    else:
+        now = datetime.now() + timedelta(seconds=10)
+        hour, min, sec = now.hour, now.minute, now.second
+            
+    # start_date = "2022-12-12"
+    # end_date = "2022-12-12"
     # print(hour, min, sec, microsec)
     
     ## trigger can be: 
@@ -107,10 +116,39 @@ def scheduled_email(gratitudeEmail, send_time):
     # One can implement their own trigger. 
     ## misfire_grace_time is None meaning it will try to send the email (do the job) as soon as it can
     
-    jobs.append(scheduler.add_job(emailHandler.sendGratitudeEmail, trigger='cron', start_date=start_date, end_date=end_date, day_of_week="mon-fri", hour=hour, minute=min, second=sec, jitter=120,  args=[gratitudeEmail],  name="{}:{}".format(gratitudeEmail.recipients, send_time)))
+    jobs.append(scheduler.add_job(emailHandler.sendGratitudeEmail, trigger='cron', start_date=start_date, end_date=end_date, 
+                                  day_of_week="mon-fri", hour=hour, minute=min, second=sec, jitter=120,  args=[gratitudeEmail],  name="{}:{}".format(gratitudeEmail.recipients, send_time)))
     scheduler.add_listener(schedule_listener, EVENT_JOB_MISSED)
     # print("Email scheduled to send: \nAt: {} (next run: {}), \nTo: {}".format(send_time, next_run_time, gratitudeEmail.recipients))
     
+    # emailHandler.sendGratitudeEmail(msg)
+# sched.start()
+ 
+ # @sched.scheduled_job('cron', day_of_week='mon-fri', hour=18)
+def schedule_email_test(gratitudeEmail, send_time):  
+    
+    # print("whaaat")
+    emailHandler = EmailHandler()
+    # in case it misses the job give it a next time with a random period of max. 120 seconds
+    # next_run_time = send_time + timedelta(seconds=random.randint(1, 120))
+    
+    hour, min, sec, microsec = 21,10,0, 0 #send_time.hour, send_time.minute, send_time.second, send_time.microsecond
+    start_date = datetime(2022,12,12) ## could be string
+    end_date = datetime(2022,12,17)
+    # print(hour, min, sec, microsec)
+    
+    ## trigger can be: 
+    # date: run the job just once at a certain point of time,
+    # interval: run the job at fixed intervals of time, or 
+    # cron: run the job periodically at certain time(s) of day.
+    # One can implement their own trigger. 
+    ## misfire_grace_time is None meaning it will try to send the email (do the job) as soon as it can
+     
+    jobs.append(scheduler.add_job(emailHandler.sendGratitudeEmail, trigger='cron', start_date=start_date, end_date=end_date,  day_of_week="mon", 
+                                  hour=hour, minute=min, second=sec, jitter=120,  args=[gratitudeEmail],  name="{}:{}".format(gratitudeEmail.recipients, end_date)))
+    scheduler.add_listener(schedule_listener, EVENT_JOB_MISSED)
+    # print("Email scheduled to send: \nAt: {} (next run: {}), \nTo: {}".format(send_time, next_run_time, gratitudeEmail.recipients))
+      
     # emailHandler.sendGratitudeEmail(msg)
 # sched.start()
 

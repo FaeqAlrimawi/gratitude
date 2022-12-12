@@ -3,7 +3,7 @@ from flask_login import current_user, login_user
 from models import User
 from werkzeug.security import generate_password_hash
 from __init__ import db 
-from control import test,addUser, scheduled_email
+from control import test,addUser
 
 
 views = Blueprint("views", __name__)
