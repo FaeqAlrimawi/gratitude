@@ -7,6 +7,12 @@ from control import test,addUser
 import threading
 from flask_mail import Message, Mail
 from EmailHandler import GratitudeEmail, EmailHandler
+from apscheduler.schedulers.background import BackgroundScheduler
+from datetime import datetime, timedelta
+  
+sched = BackgroundScheduler()
+sched.add_jobstore('sqlalchemy', url=app.config['SQLALCHEMY_DATABASE_URI'])
+sched.start()
 
 views = Blueprint("views", __name__)
 
@@ -24,7 +30,8 @@ def home():
     
     # threading.Timer(interval=5, function=test).start()
     # with app.app_context():
-    sendMessage()
+    # sendMessage()
+    scheduled_email()
     
     return render_template("home.html", user=current_user)
 
@@ -39,12 +46,34 @@ def sendMessage():
    
     emailHandler = EmailHandler()
     # print("whaaat")
-    emailHandler.sendGratitudeEmail(msg)
-    # thread = threading.Timer(interval=5, function=emailHandler.sendGratitudeEmail, args=(msg,))
-    # thread.daemon=True
-    # thread.start()
+    # emailHandler.sendGratitudeEmail(msg)
+    thread = threading.Timer(interval=5, function=emailHandler.sendGratitudeEmail, args=(msg,))
+    thread.daemon=True
+    thread.start()
     
 # return "Your email has been sent!"
+
+
+# @sched.scheduled_job('cron', day_of_week='mon-fri', hour=18)
+def scheduled_email():
+    print('This job is run every weekday at 17:26')
+    print("url", app.config['SQLALCHEMY_DATABASE_URI'])
+    
+    msg = GratitudeEmail( recipients = ['faeq.rimawi@gmail.com'], recipientName="Faeq", greetings="good evening", gratitudeTree="https://gratitude-tree.org/tree_viewer/global-payroll-greater-goods-gratitude-tree")
+        # msg.body = "Hello Flask message sent from Flask-Mail"
+        # You can also use msg.html to send html templates!
+    # Example:
+    # msg.html = render_template("hello.html") # Template should be in 'templates' folder
+    
+    msg.setHTMLContent(render_template("email_page.html", gratitudeMessage=msg.gratitudeMessage, gratitudeTreeLink=msg.gratitudeTree))
+   
+    emailHandler = EmailHandler()
+    # print("whaaat")
+    sched.add_job(emailHandler.sendGratitudeEmail, 'date', run_date=datetime.now()+timedelta(seconds=10), args=[msg])
+
+    # emailHandler.sendGratitudeEmail(msg)
+# sched.start()
+
        
 @views.route("/get-involved", methods=["GET", "POST"])
 def signUp():    

@@ -2,7 +2,7 @@ import smtplib, ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from flask_mail import Message
-from __init__ import mail
+from __init__ import mail, app
 import threading
 
 lock = threading.Lock()
@@ -80,10 +80,11 @@ class EmailHandler:
     
     def email(self, message):
         try:
-            # print("sending message to: ", recipientEmail)
-            print("msg to: ", message.recipients)
-            mail.send(message)
-            print("done sending")
+            with app.app_context():
+                # print("sending message to: ", recipientEmail)
+                print("msg to: ", message.recipients)
+                mail.send(message)
+                print("done sending")
         except Exception as e:
             # Print any error messages to stdout
             print(e)
