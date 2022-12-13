@@ -6,38 +6,37 @@
    rel="stylesheet"
    href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
-   crossorigin="anonymous"
- />
+   crossorigin="anonymous"/>
 
  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap5.css">
 
- <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='styles/email_page.css')}}">
+ <link rel="stylesheet" type="text/css" href="https://github.com/FaeqAlrimawi/gratitude/blob/4653a1b2da7e77ee96c1ff84223de99d22e6a274/static/styles/email_page.css">
 
  <link
    rel="stylesheet"
    href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
-   crossorigin="anonymous"
- />
+   crossorigin="anonymous"/>
 
  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 </head>
 
     <body>
 
-        <div class="content">
-        <h3> Whyyyyy not by grateful today?</h3>
-        <h4> {{greetings}} <i>{{recipient_name}}</i> </h4>
+        <table class="content">
+        <tr><th><h3> Why not by grateful today?</h3></th></tr>
+        <!-- <tr><th><h4> {{greetings}} <i>{{recipient_name}}</i> </h4></th></tr>-->
         {%if gratitudeMessage %}
-        <p> Add a leaf saying <b>"{{gratitudeMessage}}"</b> to the <a href="{{gratitudeTreeLink}}" target="_blank">gratitude tree</a> <p>
+        <tr><th><p> Add a leaf saying <b>"{{gratitudeMessage}}"</b> to the <a href="{{gratitudeTreeLink}}" target="_blank">gratitude tree</a> <p></th></tr>
 
         {% endif %}
         
-        <img src="{{url_for('static', filename='images/bg.jpg ', _external=True)}}" />
+        <tr><th><img src="{{url_for('static', filename='images/bg.jpg ', _external=True)}}" /></th></tr>
+
         
 
-        <p>{{ender}}</p>
-        <p>{{signature}}</p>
-        </div>
+        <tr><th><p>{{ender}}</p></th></tr>
+        <tr><th><p>{{signature}}</p></th></tr>
+        </table>
 
     </body>
 
