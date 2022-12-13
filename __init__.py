@@ -6,20 +6,20 @@ from os import path
 from flask_login import LoginManager, login_manager
 from flask_mail import Mail
 # from celery import Celery
-from pytz import utc
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
-from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
+# from pytz import utc
+# from apscheduler.schedulers.background import BackgroundScheduler
+# from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+# from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 import atexit
-from  datetime import datetime, timedelta
-import random 
+# from  datetime import datetime, timedelta
+# import random 
 
 
 db = SQLAlchemy()
 DB_NAME = "database.db"
 mail = None 
 app = Flask(__name__) 
-scheduler = None
+# scheduler = None
 # celery = Celery(app.name, broker='redis://localhost:6379/0')
  
 def create_app():
@@ -30,8 +30,8 @@ def create_app():
     app.config['SECRET_KEY'] = 'sdlgjfaiowejklvmd4%$%^DFSFD8979iJGHNDS5wgfb&^*HGHDt67dHSRTEGZHSftyretz' ## secret key
     app.config['MAIL_SERVER']='smtp.gmail.com'
     app.config['MAIL_PORT'] = 465
-    app.config['MAIL_USERNAME'] = 'frimawi22' #kindness.computing'
-    app.config['MAIL_PASSWORD'] = "btyjwvwbjayokoug" #"gjpqocclovspawrx"
+    app.config['MAIL_USERNAME'] = 'kindness.computing' #'frimawi22' 
+    app.config['MAIL_PASSWORD'] = "gjpqocclovspawrx" #"btyjwvwbjayokoug" 
     app.config['MAIL_USE_TLS'] = False
     app.config['MAIL_USE_SSL'] = True # True if Port = 465
     mail = Mail(app)
@@ -40,7 +40,7 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
     
     # init scheduler
-    init_scheduler()
+    # init_scheduler()
     # initialise DB
     
     db.init_app(app)
@@ -78,54 +78,54 @@ def create_database(app):
         print('### created database')
   
         
-def init_scheduler():
-    global scheduler
+# def init_scheduler():
+#     global scheduler
     
-    if scheduler is not None:
-        return 
+#     if scheduler is not None:
+#         return 
     
-    print("##### initializing scheduler ######")
+#     print("##### initializing scheduler ######")
    
 
-    jobstores = {
-    # 'mongo': MongoDBJobStore(),
-    'default': SQLAlchemyJobStore(url=app.config['SQLALCHEMY_DATABASE_URI'])
-    }
-    executors = {
-        'default': ThreadPoolExecutor(10), # more can cause "connection unexpectedly closed" 
-        'processpool': ProcessPoolExecutor(1) # more can cause "connection unexpectedly closed" 
-    }
-    job_defaults = {
-        'coalesce': False,
-        'max_instances': 3,
-        'misfire_grace_time': None
-    }
+#     jobstores = {
+#     # 'mongo': MongoDBJobStore(),
+#     'default': SQLAlchemyJobStore(url=app.config['SQLALCHEMY_DATABASE_URI'])
+#     }
+#     executors = {
+#         'default': ThreadPoolExecutor(15), # more can cause "connection unexpectedly closed" 
+#         'processpool': ProcessPoolExecutor(2) # more can cause "connection unexpectedly closed" 
+#     }
+#     job_defaults = {
+#         'coalesce': False,
+#         'max_instances': 3,
+#         'misfire_grace_time': None
+#     }
 
-    scheduler = BackgroundScheduler(jobstores=jobstores, executors=executors, job_defaults=job_defaults, timezone=utc)
-    # sched.add_jobstore('sqlalchemy', url=app.config['SQLALCHEMY_DATABASE_URI'])
+#     scheduler = BackgroundScheduler(jobstores=jobstores, executors=executors, job_defaults=job_defaults, timezone=utc)
+#     # sched.add_jobstore('sqlalchemy', url=app.config['SQLALCHEMY_DATABASE_URI'])
     
-    scheduler.start()
+#     scheduler.start()
     
-    if scheduler is not None:
-        pendingJobs = scheduler.get_jobs()
-        if len(pendingJobs) > 0:
-            print("scheduled jobs: ", scheduler.get_jobs())
-            # print("############ CLEARING SCHEDULE")
-            # scheduler.remove_all_jobs()
-            # for pendingJob in pendingJobs:
-            #     print("resume job-name: ", pendingJob.name)
-                # new_run_time = datetime.now() + timedelta(seconds=random.randint(1, 60))
-                # pendingJob.reschedule(trigger="date", run_date=new_run_time)
-                # scheduler.reschedule_job
-                # pendingJob.resume()  
-    # atexit.register(lambda: scheduler.shutdown())
+#     if scheduler is not None:
+#         pendingJobs = scheduler.get_jobs()
+#         if len(pendingJobs) > 0:
+#             print("scheduled jobs: ", scheduler.get_jobs())
+#             # print("############ CLEARING SCHEDULE")
+#             # scheduler.remove_all_jobs()
+#             # for pendingJob in pendingJobs:
+#             #     print("resume job-name: ", pendingJob.name)
+#                 # new_run_time = datetime.now() + timedelta(seconds=random.randint(1, 60))
+#                 # pendingJob.reschedule(trigger="date", run_date=new_run_time)
+#                 # scheduler.reschedule_job
+#                 # pendingJob.resume()  
+#     # atexit.register(lambda: scheduler.shutdown())
       
     
       
-    return scheduler
+#     return scheduler
 
 
-@atexit.register
-def exit():
-    print("existing and shutting down the scheduuler.")
-    scheduler.shutdown() if scheduler is not None else None
+# @atexit.register
+# def exit():
+#     print("existing and shutting down the scheduuler.")
+#     scheduler.shutdown() if scheduler is not None else None
