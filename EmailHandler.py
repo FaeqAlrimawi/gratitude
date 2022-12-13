@@ -2,6 +2,7 @@
 # from email.mime.text import MIMEText
 # from email.mime.multipart import MIMEMultipart
 from flask_mail import Message
+from flask import render_template
 from __init__ import mail, app
 # import threading
 from datetime import datetime, timedelta
@@ -20,7 +21,7 @@ scheduler = None
 ##### GRATITUDE EMAIL
 ## Special class to construct gratitude emails
 class GratitudeEmail(Message):
-    def __init__(self, sender="kindness.computing@gmail.com", recipients = None, subject="Be Thankful today!", recipientName="Gratituder",  greetings="Hi", gratitudeMessage="I appreciate the work you have been doing", gratitudeTree="https://gratitude-tree.org/", ender="Best wishes", signature="<br><br>--<br>Kind Computing"):
+    def __init__(self, sender="kindness.computing@gmail.com", recipients = None, subject="Be Thankful today!", recipientName="Gratituder",  greetings="Hi", gratitudeMessage="I appreciate the work you have been doing", gratitudeTree="https://gratitude-tree.org/", ender="Best wishes", signature="Kind Computing"):
         super(GratitudeEmail, self).__init__(subject=subject, recipients=recipients, sender=sender)
         self.recipients = recipients if type(recipients) is list else [recipients]
         self.recipientName = recipientName
@@ -29,51 +30,13 @@ class GratitudeEmail(Message):
         self.ender = ender
         self.signature = signature
         self.gratitudeTree = gratitudeTree
+        # self.html = None
+        self.html = self.setContent("email_page.html")
+        self.body = self.setContent("email_page.txt")
         
-        self.HTMLContent =  """<html>
-    <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    </head>
-    <body>
-        <p>
-        How about doing a small <b>gratitude</b> act? 
-        You can add a leaf, saying "<i>{}</i>", on the <a href="{}">Gratitude tree</a>
-        </p>
-    </body>
-    </html>""".format(self.gratitudeMessage, self.gratitudeTree)
-    
-        # self.html = self.getEmailWithContentOnly(self.HTMLContent)
-        
-        self.plainContent = """How about doing a Gratitude act of the day? you add a leaf, saying "{}", on the gratitude tree ({})
-        """.format(self.gratitudeMessage, self.gratitudeTree)
-    
-        # self.body = self.getEmailWithContentOnly(self.plainContent)
+    def setContent(self, email_page):
+        return render_template(email_page, greetings=self.greetings, recipient_name=self.recipientName, gratitudeMessage=self.gratitudeMessage, gratitudeTreeLink=self.gratitudeTree, ender=self.ender, signature=self.signature)
 
-    def setHTMLContent(self, htmlContent):
-        self.HTMLContent = htmlContent
-        # self.html = self.getEmailWithContentOnly(htmlContent)
-        
-    def setPlainContent(self, plainContent):
-        self.plainContent = plainContent
-        # self.body = self.getEmailWithContentOnly(plainContent)    
-        
-    def getEmailWithContentOnly(self, content):
-        return """\
-    
-    {} {}
-    
-    {}
-    
-    {}
-    
-    
-    {}
-    """.format(self.greetings, self.recipientName, content, self.ender, self.signature)
-          
-    def prepareMessage(self):
-        self.html = self.getEmailWithContentOnly(self.HTMLContent)
-        self.body = self.getEmailWithContentOnly(self.plainContent)
         
 ##########################################
 ##########################################
@@ -87,11 +50,7 @@ class EmailHandler:
         self.init_scheduler()
         self.scheduled_jobs = []
         scheduler.add_listener(self.schedule_listener, EVENT_JOB_MISSED)
-         
-    def sendGratitudeEmail(self, gratitudeEmail: GratitudeEmail):
-        gratitudeEmail.prepareMessage()
-        self.email(gratitudeEmail)
-        
+             
     def init_scheduler(self):
         global scheduler
     
@@ -149,6 +108,10 @@ class EmailHandler:
             # Print any error messages to stdout
             print(e)
          
+    def sendGratitudeEmail(self, gratitudeEmail: GratitudeEmail):
+        # gratitudeEmail.prepareMessage()
+        self.email(gratitudeEmail)
+        
             
     # @sched.scheduled_job('cron', day_of_week='mon-fri', hour=18)
     def schedule_emails_weekly(self, gratitudeEmail, start_date=None, end_date=None, send_time=None):  

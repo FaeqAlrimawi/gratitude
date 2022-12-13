@@ -21,7 +21,7 @@ def test():
     # fillWithDummyData()
 
     givers = Giver.query.all()
-    num = 50
+    num = 1
     # receiver = Receiver.query.filter_by(name="Tom").first()
     print("send to: ", len(givers[:num]))
     
@@ -70,7 +70,7 @@ def sendGratitudeEmailToGivers(givers, gratitudeAct="random", send_time=None):
         ### email content construction: plain text
         gratEmail = GratitudeEmail(recipientName=giverName, recipients=giverEmail, gratitudeMessage=gratitude_msg, greetings="Good Evening", ender="Thank you for brightening one's day!")
         # gratEmail.setHTMLContent(None)
-        gratEmail.setHTMLContent(render_template("email_page.html", gratitudeMessage=gratEmail.gratitudeMessage, gratitudeTreeLink=gratEmail.gratitudeTree))
+        # gratEmail.setHTMLContent(render_template("email_page.html", gratitudeMessage=gratEmail.gratitudeMessage, gratitudeTreeLink=gratEmail.gratitudeTree))
         ## schedule send
         
         if send_time is None: # send in a random time between 1 and the number 60 (avoid sending all at the same time)

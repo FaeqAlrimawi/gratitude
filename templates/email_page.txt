@@ -1,0 +1,10 @@
+{{greetings}} {{recipient_name}},
+
+How about doing a Gratitude act of the day? you add a leaf, saying "{{gratitudeMessage}}", on the gratitude tree ({{gratitudeTreeLink}})
+
+Making someone's day, and yours, takes only few seconds :-)
+
+
+{{ender}}
+
+{{signature}}

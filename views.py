@@ -28,24 +28,6 @@ def home():
     
     return render_template("home.html", user=current_user)
 
-# def sendMessage():
-#     msg = GratitudeEmail( recipients = ['faeq.rimawi@gmail.com'], recipientName="Faeq", greetings="good evening", gratitudeTree="https://gratitude-tree.org/tree_viewer/global-payroll-greater-goods-gratitude-tree")
-#         # msg.body = "Hello Flask message sent from Flask-Mail"
-#         # You can also use msg.html to send html templates!
-#     # Example:
-#     # msg.html = render_template("hello.html") # Template should be in 'templates' folder
-    
-#     msg.setHTMLContent(render_template("email_page.html", gratitudeMessage=msg.gratitudeMessage, gratitudeTreeLink=msg.gratitudeTree))
-   
-#     emailHandler = EmailHandler()
-#     # print("whaaat")
-#     # emailHandler.sendGratitudeEmail(msg)
-#     thread = threading.Timer(interval=5, function=emailHandler.sendGratitudeEmail, args=(msg,))
-#     thread.daemon=True
-#     thread.start()
-    
-# return "Your email has been sent!"
-
        
 @views.route("/get-involved", methods=["GET", "POST"])
 def signUp():    
@@ -68,13 +50,13 @@ def signUp():
     return render_template("get_involved.html", user=current_user)
 
 
-# @views.route("/view-email", methods=["POST", "GET"])
-# def viewEmail():
-#     msg = GratitudeEmail( recipients = ['faeq.rimawi@gmail.com'], recipientName="Faeq", greetings="good evening", gratitudeTree="https://gratitude-tree.org/tree_viewer/global-payroll-greater-goods-gratitude-tree")
-#         # msg.body = "Hello Flask message sent from Flask-Mail"
-#         # You can also use msg.html to send html templates!
-#     # Example:
-#     # msg.html = render_template("hello.html") # Template should be in 'templates' folder
+@views.route("/view-email", methods=["POST", "GET"])
+def viewEmail():
+    # msg = GratitudeEmail( recipients = ['faeq.rimawi@gmail.com'], recipientName="Faeq", greetings="good evening", gratitudeTree="https://gratitude-tree.org/tree_viewer/global-payroll-greater-goods-gratitude-tree")
+        # msg.body = "Hello Flask message sent from Flask-Mail"
+        # You can also use msg.html to send html templates!
+    # Example:
+    # msg.html = render_template("hello.html") # Template should be in 'templates' folder
     
-#     return render_template("email_page.html", gratitudeMessage=msg.gratitudeMessage, gratitudeTreeLink=msg.gratitudeTree)
+    return render_template("email_page.html", gratitudeMessage="Hello", gratitudeTreeLink="msg.gratitudeTree")
    

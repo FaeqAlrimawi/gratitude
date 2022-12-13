@@ -1,15 +1,39 @@
 <html>
 
 <head>
-    <title>Testingg</title>
+   <link
+   rel="stylesheet"
+   href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+   integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+   crossorigin="anonymous"
+ />
+
+ <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap5.css">
+
+ <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='styles/email_page.css')}}">
+
+ <link
+   rel="stylesheet"
+   href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+   crossorigin="anonymous"
+ />
+
+ <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+</head>
+
     <body>
-        <h3> Why not by grateful today?</h3>
+       
+        <h3> Whyyyyy not by grateful today?</h3>
+        <h4> {{greetings}} <i>{{recipient_name}}</i> </h4>
         {%if gratitudeMessage %}
         <p> Add a leaf saying <b>"{{gratitudeMessage}}"</b> to the <a href="{{gratitudeTreeLink}}" target="_blank">gratitude tree</a> <p>
         {% endif %}
         <p>
         <img src="https://media.tenor.com/-NZbBgfGK4cAAAAM/amazing-nubbies.gif">
         </p>
+
+        <p>{{ender}}</p>
+        <p>{{signature}}</p>
     </body>
-</head>
+
 </html>
