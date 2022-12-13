@@ -23,10 +23,23 @@
 
     <body>
        
+
         <h3> Whyyyyy not by grateful today?</h3>
         <h4> {{greetings}} <i>{{recipient_name}}</i> </h4>
         {%if gratitudeMessage %}
         <p> Add a leaf saying <b>"{{gratitudeMessage}}"</b> to the <a href="{{gratitudeTreeLink}}" target="_blank">gratitude tree</a> <p>
+
+            <form method="POST">
+                <h3 align="center">Send gratitude message</h3>
+                
+                <div class="form-group">
+                    <input type="text" class="form-control" id="email" name="gratitudeMsg" placeholder="gratitude message"/>
+                </div>
+    
+                <br/>
+                <button type="submit" class="btn btn-primary">send</button>
+            </form>
+
         {% endif %}
         <p>
         <img src="https://media.tenor.com/-NZbBgfGK4cAAAAM/amazing-nubbies.gif">

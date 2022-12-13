@@ -30,7 +30,6 @@ class GratitudeEmail(Message):
         self.ender = ender
         self.signature = signature
         self.gratitudeTree = gratitudeTree
-        # self.html = None
         self.html = self.setContent("email_page.html")
         self.body = self.setContent("email_page.txt")
         
