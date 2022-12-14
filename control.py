@@ -32,7 +32,7 @@ def test():
     # actors = Actor.query.all()
     # send_time = datetime(2022,12,12,14,20,00)
     sendGratitudeEmailToGivers(givers[:num])
-    
+    # sendGratitudeEmailToRecipientsEmails(("faeq.alrimawi@lero.ie", "Faeq"))
     # print(giver.name,giver.email)
                    
                    
@@ -82,7 +82,45 @@ def sendGratitudeEmailToGivers(givers, gratitudeAct="random", send_time=None):
             emailHandler.schedule_email_at(gratEmail, new_send_time) 
     
 
-     
+def sendGratitudeEmailToRecipientsEmails(recipients, gratitudeAct="random", send_time=None):
+    
+    emailHandler = EmailHandler()
+    
+    if type(recipients) is not list:
+        recipients = [recipients]
+        
+    for recipient in recipients:
+        giverEmail = recipient[0]
+        giverName = recipient[1]
+        
+        if giverEmail is None or giverEmail == "":
+            print("no email found for Giver: {}".format(giverName))
+            continue
+        
+        if type(gratitudeAct) is Gratitudeact:
+            gratitude_msg = gratitudeAct.message
+        elif type(gratitudeAct) is str and gratitudeAct == "random":
+            randGratitudeAct = getRandomGratitudeAct()
+            
+            gratitude_msg = randGratitudeAct.message if randGratitudeAct is not None else "Thank you!" 
+        else:    
+            gratitude_msg = "Thank you!" # default gratitude message
+                
+        ### email content construction: plain text
+        gratEmail = GratitudeEmail(recipientName=giverName, recipients=giverEmail, gratitudeMessage=gratitude_msg, greetings="Good Evening", ender="Thank you for brightening one's day!")
+        # gratEmail.setHTMLContent(None)
+        # gratEmail.setHTMLContent(render_template("email_page.html", gratitudeMessage=gratEmail.gratitudeMessage, gratitudeTreeLink=gratEmail.gratitudeTree))
+        ## schedule send
+        
+        if send_time is None: # send in a random time between 1 and the number 60 (avoid sending all at the same time)
+            new_send_time = datetime.now()# + timedelta(seconds=random.randint(1, 1))
+            
+            # print(new_send_time)
+        # now = datetime.utcnow()
+        # schedule_email_test(gratEmail,new_send_time)
+            emailHandler.schedule_email_at(gratEmail, new_send_time)   
+   
+         
 def fillWithDummyData():
     
     ##gratitude act
