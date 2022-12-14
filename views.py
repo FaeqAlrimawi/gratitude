@@ -58,5 +58,5 @@ def viewEmail():
     # Example:
     # msg.html = render_template("hello.html") # Template should be in 'templates' folder
     
-    return render_template("email_page.html", gratitudeMessage="Hello", gratitudeTreeLink="msg.gratitudeTree")
+    return render_template("email_reminder.html", gratitudeMessage="Hello", gratitudeTreeLink="msg.gratitudeTree")
    
