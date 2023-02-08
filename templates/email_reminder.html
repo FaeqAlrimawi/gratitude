@@ -17,6 +17,23 @@
   transform: translate(-50%, -50%);
 }
 
+
+.my_button {
+    border-radius: 10px;
+}
+
+.my_button a {
+    padding: 8px 12px;
+   
+    border-radius: 2px;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 20px;
+    color: #ffffff; 
+    text-decoration: none;
+    font-weight: bold;
+    display: inline-block;  
+}
+
 {% endblock %}
 
 {% block preheader%}
@@ -41,6 +58,19 @@ A Small Thank You, A Big Reward <span style="font-size:15px;">(or something that
         <p> Be grateful today bla bla... We can help you... add a leaf, saying <span style="font-size: 16px; font-weight:bold">"{{gratitudeMessage}}"</span>, to the <span style="font-size:16px;"><a href="{{gratitudeTreeLink}}" target="_blank">gratitude tree</a></span> <p>
 
 {% endif %}
+
+
+
+            <table cellspacing="0" cellpadding="0" >
+                <tr>
+                    <td class="my_button" bgcolor="#ED2939" style="horizontal-align: center;">
+                        <a  class="link" href="{{gratitudeTreeLink}}" target="_blank">
+                            Add Leaf             
+                        </a>
+                    </td>
+                </tr>
+            </table>
+ 
 
 
     <img src="https://media.istockphoto.com/id/1173157613/photo/colorful-autimn-leaves-on-white-wooden-background.jpg?s=170667a&w=0&k=20&c=kwt4yQTLJPufVHcbPk3HXCY8CvuhUv7Fahv_UAthCfE=" alt="gratitude-leaf" style="width:100%;">

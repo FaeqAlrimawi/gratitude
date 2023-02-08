@@ -21,7 +21,7 @@ def test():
     # fillWithDummyData()
 
     givers = Giver.query.all()
-    num = 1
+    num = 50
     # receiver = Receiver.query.filter_by(name="Tom").first()
     print("send to: ", len(givers[:num]))
     
@@ -31,8 +31,8 @@ def test():
     # print("grat: ", gratAct.message)
     # actors = Actor.query.all()
     # send_time = datetime(2022,12,12,14,20,00)
-    sendGratitudeEmailToGivers(givers[:num])
-    # sendGratitudeEmailToRecipientsEmails(("faeq.alrimawi@lero.ie", "Faeq"))
+    # sendGratitudeEmailToGivers(givers[:num])
+    sendGratitudeEmailToRecipientsEmails(("kindness.computing@gmail.com", "Faeq"))
     # print(giver.name,giver.email)
                    
                    
@@ -74,7 +74,7 @@ def sendGratitudeEmailToGivers(givers, gratitudeAct="random", send_time=None):
         ## schedule send
         
         if send_time is None: # send in a random time between 1 and the number 60 (avoid sending all at the same time)
-            new_send_time = datetime.now()# + timedelta(seconds=random.randint(1, 1))
+            new_send_time = datetime.now() + timedelta(seconds=random.randint(1, 120))
             
             # print(new_send_time)
         # now = datetime.utcnow()
