@@ -10,6 +10,7 @@ views = Blueprint("views", __name__)
 
 # the route of our website
 @views.route('/', methods=['GET', 'POST'])
+
 def home():
     
     myEmail="faeq.rimawi@gmail.com"
